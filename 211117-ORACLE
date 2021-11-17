@@ -1,0 +1,249 @@
+SELECT * FROM USER_OBJECTS;
+
+SELECT object_name FROM USER_OBJECTS WHERE OBJECT_TYPE = 'TABLE';
+
+SELECT * FROM EMP;
+SELECT ENAME, SAL, SAL + 3000 FROM EMP ;
+
+-- null은 제외하고 연산
+SELECT ENAME , SAL + COMM 
+FROM EMP
+WHERE COMM IS NOT NULL;
+
+-- null을 다른 값으로 대체
+SELECT ENAME , SAL + NVL(COMM, 0) 
+FROM EMP e ;
+
+SELECT ENAME AS "이름" , SAL + NVL(COMM, 0) AS "연봉"
+FROM EMP e ;
+
+-- EMP 테이블에서 ENAME 과 JOB을 조회하는데 2개의 정보를 중간에 공백을 삽입해서 하나로 만듦
+SELECT ENAME ||' '||JOB AS "EMPLOYEES"
+FROM EMP;
+
+-- EMP 테이블에서 JOB을 조회
+SELECT JOB
+FROM EMP e ;
+
+-- EMP 테이블에서 중복된 데이터를 제거하고 JOB을 조회
+SELECT DISTINCT JOB
+FROM EMP e ;
+
+-- DISTINCT는 SELECT절에 맨 앞에 1번만 나와야 함 - 에러
+SELECT DEPTNO DISTINCT JOB
+FROM EMP e ;
+
+--DISTINCT 다음에 2개의 열이 오면 2개의 열 모든 값이 일치한 경우만 제거
+SELECT DISTINCT JOB , DEPTNO
+FROM EMP e ;
+
+-- EMP 테이블의 전체 데이터 조회
+
+SELECT *
+FROM EMP;
+
+-- EMP 테이블의 전체 데이터를 조회하는데 JOB을 오름차순으로 조회
+
+SELECT *
+FROM EMP 
+ORDER BY JOB;
+
+-- EMP 테이블의 전체 데이터를 조회하는데 JOB을 내림차순으로 조회
+
+SELECT *
+FROM EMP 
+ORDER BY JOB DESC ;
+
+--EMP 테이블의 전체 데이터를 조회하는데 JOB의 내림차순으로 조회
+
+SELECT *
+FROM EMP 
+ORDER BY 3 DESC ;
+
+--EMP 테이블의 전체 데이터를 조회하는데 SAL + 300의 내림차순으로 조회
+SELECT *
+FROM EMP 
+ORDER BY SAL + 300 DESC ;
+
+--DEPT 테이블에서 DEPTNO와 DNAME을 조회하는데 DNAME은 부서명이라는 별명을 부여
+--부서명의 오름차순으로 정렬
+SELECT DEPTNO , DNAME AS "부서명"
+FROM DEPT
+ORDER BY DNAME;
+
+--ORDER BY에서는 SELECT의 원래 이름을 적어도 되고 별명을 적어도 됨
+SELECT DEPTNO , DNAME 부서명
+FROM DEPT
+ORDER BY 부서명;
+
+SELECT DEPTNO ,SAL ,EMPNO ,ENAME ,JOB 
+FROM EMP
+ORDER BY DEPTNO , SAL DESC ;
+
+--EMP 테이블에서 키본키는 EMPNO
+--EMP 테이블에서 모든 데이터를 조회하는데 EMPNO 의 오름차순으로 정렬해서 조회
+
+SELECT /*+ INDEX_ASC(EMP) */ *
+FROM EMP;
+
+--EMP 테이블에서 모든 데이터를 조회하는데 EMPNO 의 내림차순으로 정렬해서 조회
+
+SELECT /*+ INDEX_DESC(EMP) */ *
+FROM EMP;
+
+--EMP테이블에서 SAL이 3000 이상인 데이터의 EMPNO, ENAME,JOB,SAL을 조회
+
+SELECT EMPNO ,ENAME ,JOB ,SAL
+FROM EMP
+WHERE SAL >= 3000;
+
+--EMP테이블에서 JOB이 MANAGER인 데이터의 EMPNO,ENAME,JOB,SAL,DEPTNO를 조회
+SELECT EMPNO ,ENAME ,JOB ,SAL ,DEPTNO
+FROM EMP
+WHERE JOB = 'MANAGER' ;
+
+--EMP 테이블에서 HIREDATE(입사일)이 1982년 1월 1일 이후인 사원의 EMPNO, ENAME, HIREDATE 조회
+SELECT EMPNO ,ENAME ,HIREDATE 
+FROM EMP 
+WHERE HIREDATE >= TO_DATE('1982/01/01') ;
+
+--EMP 테이블에서 SAL의 값이 1300 에서 1500사이인 데이터의 모든 열을 조회
+SELECT * 
+FROM EMP
+WHERE SAL BETWEEN 1300 AND 1500;
+
+--EMP 테이블에서 HIREDATE 가 1982년인 데이터의 모든 열의 조회
+SELECT *
+FROM EMP
+WHERE HIREDATE BETWEEN TO_DATE('1982/01/01') AND 
+TO_DATE('1982/12/31'); 
+
+-- EMP 테이블에서 JOB이 MANAGER 이거나 CLERK인 사원의 ENAME, JOB, SAL을 조회
+SELECT *
+FROM EMP
+WHERE JOB IN ('MANAGER','CLERK');
+
+--EMP 테이블에서 HIREDATE 가 1982년인 데이터의 모든 열을 조회
+
+SELECT *
+FROM EMP
+WHERE HIREDATE LIKE '82%' ;
+
+--EMP 테이블에서 ENAME이 5글자인 사원의 모든 정보를 조회
+
+SELECT *
+FROM EMP
+WHERE ENAME LIKE '_____';
+
+--EMP테이블에서 COMM이 NULL인 데이터의 ENAME을 조회
+--실제 데이터가 NULL인 데이터를 조회 - 조회되는 데이터가 없음
+
+SELECT ENAME 
+FROM EMP
+WHERE COMM = NULL;
+
+--데이터가 없는 데이터를 조회 - 10개
+
+SELECT ENAME 
+FROM EMP
+WHERE COMM IS NULL;
+
+--NULL이 아닌 데이터 조회 - IS NOT NULL - 4건
+
+SELECT ENAME 
+FROM EMP
+WHERE COMM IS NOT NULL;
+
+--EMP 테이블에서 JOB이 SALESMAN 이거나 PRESIDENT인 데이터 중에서
+--SAL이 1500이 넘는 사원의 EMPNO, ENAME,JOB,SAL을 조회
+SELECT EMPNO ,ENAME,JOB ,SAL
+FROM EMP
+WHERE (JOB = 'SALESMAN' OR JOB = 'PRESIDENT') AND SAL > 1500;
+
+--연습문제
+
+--EMP 테이블에서 SAL이 3000이상인 사원의 EMPNO, ENAME, JOB, SAL을 조회하는 SELECT 문
+--장을 작성
+SELECT EMPNO ,ENAME,JOB,SAL 
+FROM EMP
+WHERE SAL >= 3000;
+
+--EMP 테이블에서 EMPNO가 7788인 사원의 ENAME과 DEPTNO를 조회하는 SELECT 문장을 작성
+
+SELECT ENAME ,DEPTNO 
+FROM EMP
+WHERE EMPNO = 7788;
+
+--EMP 테이블에서 HIREDATE가 1981년 2월 20일 과 1981년 5월 1일 사이에 입사한 사원의
+--ENAME, JOB, HIREDATE을 조회하는 SELECT 문장을 작성(단 HIREDATE 순으로 조회)
+
+SELECT ENAME ,JOB ,HIREDATE
+FROM EMP 
+WHERE HIREDATE 
+BETWEEN TO_DATE('1981/02/20') AND TO_DATE('1981/05/01'); 
+
+--EMP 테이블에서 DEPTNO가 10, 20인 사원의 모든 정보를 조회하는 SELECT 문장을 작성(단
+--ENAME순으로 조회)
+
+SELECT *
+FROM EMP
+WHERE DEPTNO = 10 OR DEPTNO = 20
+ORDER BY DEPTNO ;
+
+--EMP 테이블에서 SAL이 1500이상이고 DEPTNO가 10, 30인 사원의 ENAME과 SAL를 조회하는
+--SELECT 문장을 작성(단 HEADING을 EMPLOYEE 와 MONTHLY SALARY로 조회)
+
+SELECT ENAME AS EMPLOYEE ,SAL AS "MONTHLY SALARY"
+FROM EMP
+WHERE SAL >= 1500 AND (DEPTNO = 10 OR DEPTNO = 30);
+
+-- EMP 테이블에서 HIREDATE가 1982년인 사원의 모든 정보를 조회하는 SELECT 문을 작성
+
+SELECT *
+FROM EMP
+WHERE HIREDATE BETWEEN TO_DATE('1982/01/01') AND TO_DATE('1982/12/31') ; 
+
+--EMP 테이블에서 COMM이 NULL이 아닌 사원의 모든 정보를 조회하는 SELECT 문을 작성
+
+SELECT *
+FROM EMP
+WHERE COMM IS NOT NULL ;
+
+--EMP 테이블에서 COMM이 SAL보다 10% 이상 많은 사원에 대하여 ENAME,SAL, COMM를 조회
+--하는 SELECT 문을 작성
+
+SELECT ENAME ,SAL ,COMM 
+FROM EMP
+WHERE COMM >= SAL +(SAL*0.1);
+
+--EMP 테이블에서 JOB이 CLERK이거나 ANALYST이고 SAL이 1000, 3000, 5000이 아닌 사원의 모
+--든 정보를 조회하는 SELECT 문을 작성
+
+SELECT *
+FROM EMP
+WHERE (JOB = 'CLERK' OR JOB = 'ANALYST') AND SAL != 1000 AND SAL != 3000 AND SAL != 5000;
+
+--EMP 테이블에서 ENAME에 A 와 E 가 포함되어 있는 데이터의 ENAME 과 SAL을 조회하는
+--SELECT 문을 작성
+
+SELECT ENAME ,SAL 
+FROM EMP
+WHERE ENAME LIKE '%A%E%' OR ENAME LIKE '%E%A%';
+
+--EMP 테이블에서 (ENAME에 L이 두 자 이상이 포함되어 있고 DEPTNO가 30)이거나 MGR이 7782
+--인 사원의 모든 정보를 조회하는 SELECT 문을 작성
+
+SELECT *
+FROM EMP
+WHERE ENAME LIKE '%L%L%' AND DEPTNO = 30 OR MGR = 7782;
+
+
+
+
+
+
+
+
+
+
+
