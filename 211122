@@ -1,0 +1,374 @@
+--컬럼 레벨 제약 조건을 이용한 테이블 생성
+CREATE TABLE EMP11(
+	EMPNO NUMBER(4) PRIMARY KEY,
+	ENAME VARCHAR2(10) NOT NULL,
+	JOB VARCHAR2(9) UNIQUE,
+	DEPTNO NUMBER(4) REFERENCES DEPT(DEPTNO)
+);
+
+--테이블 레벨 제약 조건을 이용한 테이블 생성
+CREATE TABLE EMP12(
+	EMPNO NUMBER(4),
+	ENAME VARCHAR2(10) NOT NULL,
+	JOB VARCHAR2(9),
+	DEPTNO NUMBER(4) ,
+	CONSTRAINT EMP12_PK PRIMARY KEY(EMPNO),
+	UNIQUE(JOB),
+	FOREIGN KEY(DEPTNO) REFERENCES DEPT(DEPTNO)
+);
+
+--기본키를 복합기로 설정하고자 하면 () 안에 여러개의 속성을 나열
+
+--제약조건 추가
+ALTER TABLE 테이블이름 ADD 제약조건명 제약조건종류(컬럼이름)
+
+--제약조건 변경
+--NOT NULL은 컬럼의 크기를 변경하는 것이기 떄문에 제약조건 추가로 설정하는 것이 아니고 변경으로 설정
+ALTER TABLE 테이블이름 MODIFY 컬럼이름 제약조건명 NOT NULL;
+
+--제약조건 제거
+ALTER TABLE 테이블이름 DROP CONSTRAINT 제약조건명;
+--제약조건을 만들 때 명시적으로 이름을 설정하지 않으면 삭제 할 때 어려워짐
+--제약조건 이름을 설정하지 않으면 오라클은 SYS로 시작하는 일련번호 형태로 제약조건 이름을 설정
+
+--제약조건 비활성화와 활성화
+--제약조건이 설정되어있으면 테스트를 위해서 샘플 데이터를 생성하고 삭제하는데 어려움이 있을 수 있음
+
+--제약조건 비활성화
+ALTER TABLE 테이블이름 DISABLE CONSTRAINT 이름;
+
+--제약조건 활성화
+ALTER TABLE 테이블이름 ENABLE CONSTRAINT 이름;
+
+--주석
+--SQL에서는 --주석 형태로 만들면 SQL실행 시 수행하지 않음
+--보충 설명을 만들 때는 CONMMENT ON [TALBE | TABLE.COLUMN] IS 주석
+--주석을 보기 위해서는
+SELECT COMMENTS
+FROM USER_TAB_COMMENTS 
+WHERE TABLE_NAME = '테이블이름';
+
+--데이터베이스 모델링 - 설계
+--개념적 모델링 : 그림 - 고객이 알아보도록, E-R DIAGRAM 이 대표적
+--논리적 모델링 : 문서화 - 고객도 보지만 개발자도 알아보도록
+--물리적 모델링 : 실제 구현이 가능하도록 - DBMS가 특정화되어야 함
+
+--개발순서 (생명주기)
+--기획 -> 부석 -> 설계(MODELING) -> 구현 -> 테스트 -> 수정 ->유지보수
+
+--많이 사용되는 형식
+--정보 공학 표기법(IE)
+--BARKER'S NOTATION
+
+--3.쇼핑몰
+--고객 : 고객 아이디(기본키(PRIMARY KEY)), 고객이름, 고객비밀번호,전화번호,주소
+
+--상품 : 상품 아이디(기본키(PRIMARY KEY)), 상품이름, 상품가격
+--상품이미지테이블: 기본키가 될만한 컬럼, 상품아이디, 상품이미지
+
+--4. 게시판
+
+--회원 : MYMEMBER
+-- 고객 ID(MEMBER_ID, PRIMARY KEY, 영문숫자 30자)
+-- 고객 PW(MEMBER_PW, NOT NULL, 대소문자영문숫자특문 20자)
+-- 고객 이름(MEMBER_NAME, NOT NULL, 한글 30자)
+-- 닉네임 (MEMBER_NICKNAME, NOT NULL,UNIQUE, 한글 30자)
+-- 이메일 (MEMBER_EMAIL, NOT NULL, 영문숫자 40자)
+-- 전화번호 (MEMBER_PHONE, NOT NULL, 숫자 11자)
+-- 주소 (MEMBER_ADDRESS, NOT NULL, 한글 200자)
+-- 마지막접속IP (MEMBER_IP, 선택 , 영문과 숫자 32자)
+-- 마지막 로그인 날짜(MEMBER_LOGINDATE, 선택 , 날짜)
+-- 가입일자 (MEMBER_JOINDATE, 당일날짜,날짜)
+-- 주민번호 앞6자리+뒤1자리 (MEMBER_RRN, NOT NULL, 숫자7자)
+-- 등급 (MEMBER_RANK , 기본값으로 RANK_1.PNG, 영문특문숫자 100자)
+
+CREATE TABLE MYMEMBER(
+	MEMBER_ID VARCHAR2(30) PRIMARY KEY,
+	MEMBER_PW VARCHAR2(20) NOT NULL,
+	MEMBER_NAME VARCHAR2(30) NOT NULL,
+	MEMBER_NICKNAME VARCHAR2(30) NOT NULL,
+	MEMBER_EMAIL VARCHAR2(40) NOT NULL,
+	MEMBER_PHONE VARCHAR2(11) NOT NULL,
+	MEMBER_ADDRESS VARCHAR2(200) NOT NULL,
+	MEMBER_IP VARCHAR2(32),
+	MEMBER_LOGINDATE DATE,
+	MEMBER_JOINDATE DATE DEFAULT SYSDATE,
+	MEMBER_RRN VARCHAR2(7) NOT NULL,
+	MEMBER_RANK VARCHAR2(100) DEFAULT 'RANK_1.PNG',
+	UNIQUE(MEMBER_NICKNAME)
+);
+
+
+--게시글 MYBOARD
+-- 게시물ID(BOARD_ID, PRIMARY KEY, 정수)
+-- 제목(BOARD_TITLE, NOT NULL, 한글 30자)
+-- 내용(BOARD_CONTENT, NOT NULL, 한글 500자)
+-- 작성 날짜(BOARD_DATE, 현재날짜, 날짜)
+-- 수정 날짜(BOARD_UPDATEDATE, 현재날짜, 날자)
+-- 조회수(BOARD_READ, 기본값0 , 정수)
+-- 닉네임(MEMBER_NICKNAME, MEMBER 테이블의 외래키, 한글 30자)
+-- 마지막접속IP (MEMBER_IP, 선택 , 영문과 숫자 32자)
+
+CREATE TABLE MYBOARD(
+	BOARD_ID NUMBER PRIMARY KEY,
+	BOARD_TITLE VARCHAR2(30) NOT NULL,
+	BOARD_CONTENT VARCHAR(500) NOT NULL,
+	BOARD_DATE DATE DEFAULT SYSDATE,
+	BOARD_UPDATEDATE DATE DEFAULT SYSDATE,
+	BOARD_READ NUMBER DEFAULT 0,
+	MEMBER_NICKNAME VARCHAR(30),
+	MEMBER_IP VARCHAR(32),
+	FOREIGN KEY(MEMBER_NICKNAME) REFERENCES MYMEMBER(MEMBER_NICKNAME)
+	ON DELETE CASCADE
+	);
+
+
+
+--게시글이미지(MYBOARDIMAGE)
+-- 게시글이미지번호(BOARD_IMAGENUMBER, PRIMARY KEY, 정수)
+-- 게시글ID(BOARD_ID, BOARD테이블의 외래키, 정수)
+-- 게시글이미지(BOARD_IMAGE, 한글 100자)
+
+
+CREATE TABLE MYBOARDIMAGE(
+	BOARD_IMAGENUMBER NUMBER ,
+	BOARD_ID NUMBER ,
+	BOARD_IMAGE VARCHAR(100),
+	CONSTRAINT BOARDIMAGE_NUMABER_PK PRIMARY KEY(BOARD_IMAGENUMBER),
+	CONSTRAINT BOARDIMAGE_BOARD_ID_PK FOREIGN KEY(BOARD_ID) REFERENCES MYBOARD(BOARD_ID) ON DELETE CASCADE
+);
+
+--댓글(MYBOARDREPLY)
+-- 댓글ID(REPLY_ID, PRIMARY KEY, 정수)
+-- 게시물ID(BOARD_ID, BOARD테이블의 외래키, 정수)
+-- 댓글내용(BOARD_REPLY, 한글 100자)
+-- 댓글날짜(BOARD_WRITEDATE, 날짜, 현재날짜)
+-- 별명(MEMBER_NICKNAME, MEMBER테이블의 외래키, 한글30자)
+-- 마지막접속IP (MEMBER_IP, 선택 , 영문과 숫자 32자)
+
+CREATE TABLE MYBOARDREPLY(
+	REPLY_ID NUMBER,
+	BOARD_ID NUMBER ,
+	REPLY_CONTENT VARCHAR(300),
+	REPLY_WRITEDATE DATE DEFAULT SYSDATE,
+	MEMBER_NICKNAME VARCHAR(30) ,
+	MEMBER_IP VARCHAR(32),
+	CONSTRAINT REPLY_ID_PK PRIMARY KEY(REPLY_ID),
+	CONSTRAINT REPLY_BOARD_ID_FK FOREIGN KEY (BOARD_ID) REFERENCES MYBOARD(BOARD_ID) ON DELETE CASCADE,
+	CONSTRAINT REPLY_MEMBER_NICKNAME_FK FOREIGN KEY (MEMBER_NICKNAME) REFERENCES MYMEMBER(MEMBER_NICKNAME) ON DELETE CASCADE
+);
+
+
+
+SELECT * FROM MYMEMBER;
+
+SELECT * FROM MYBOARD;
+
+SELECT * FROM MYBOARDIMAGE;
+
+SELECT * FROM MYBOARDREPLY;
+
+CREATE TABLE DEPT01 AS 
+SELECT *
+FROM DEPT
+WHERE 1=0;
+
+--데이터 삽입
+INSERT INTO DEPT01(DEPTNO,DNAME,LOC) VALUES(10,'영업','서울');
+
+--데이터 조회
+DROP TABLE DEPT01;
+SELECT * FROM DEPT01;
+
+--MYMEMBER에 데이터 삽입
+
+INSERT INTO MYMEMBER(MEMBER_ID,MEMBER_PW,MEMBER_NAME,MEMBER_NICKNAME,MEMBER_EMAIL,MEMBER_PHONE,MEMBER_ADDRESS,MEMBER_RRN)
+VALUES('MAN10_48',1324,'김재민','장백산','MAN10_48@NAVER.COM','01075560365','경기도','9304212');
+
+SELECT DECODE(SUBSTR(MEMBER_RRN,7,1) ,'1','남','2','여','3','남','4','여',NULL)  FROM MYMEMBER WHERE MEMBER_NAME = '김재민';
+
+SELECT * FROM MYMEMBER WHERE MEMBER_ID = 'MAN10_49' AND MEMBER_PW = '1324'; -- 로그인
+UPDATE MYMEMBER SET MEMBER_LOGINDATE = SYSDATE WHERE MEMBER_ID = 'MAN10_49'; -- 마지막로그인 날짜수정
+UPDATE MYMEMBER SET MEMBER_IP = '192.168.10.80' WHERE MEMBER_ID = 'MAN10_49'; -- 마지막로그인 IP수정
+
+SELECT * FROM DEPT01;
+
+--명시적으로 NULL을 설정해도 됨
+--''으로 입력해도 NULL이 삽입됨
+INSERT INTO DEPT01(DEPTNO,DNAME) VALUES(30,'비서');
+INSERT INTO DEPT01(DEPTNO,DNAME,LOC) VALUES(40,'회계',NULL);
+INSERT INTO DEPT01(DEPTNO,DNAME,LOC) VALUES(50,'인사','');
+
+--서브 쿼리를 이용한 삽입
+INSERT INTO 테이블이름
+SELECT 구문
+
+--DEPT테이블의 구조만 복사한 DEPT02 테이블을 생성
+
+CREATE TABLE DEPT03 AS SELECT * FROM DEPT WHERE 1=0;
+SELECT * FROM DEPT03;
+INSERT INTO DEPT03(DEPTNO,DNAME,LOC) SELECT * FROM DEPT;
+DROP TABLE DEPT03;
+
+INSERT ALL
+INTO 테이블이름(컬럼이름 나열)
+INTO 테이블이름(컬럼이름 나열)
+SELECT 구문;
+--SELECT 구문의 컬럼이름과 INTO에 있는 컬럼이름이 동일해야합니다.
+INSERT ALL INTO DEPT01(DEPTNO,DNAME,LOC) INTO DEPT02(DEPTNO,DNAME,LOC) SELECT * FROM DEPT;
+
+--NO LOGGING
+--데이터베이스의 테이블에 데이터를 조작하면 데이터베이스는 LOG FILE에 그 내용을 기록
+--CHECK POINT라는 이벤트가 발생하면 LOG FILE의 데이터를 DATA FILE로 저장
+--NO LOGGING옵션은 LOG FILE의 기록을 최소화시켜서 성능을 향상시키는 방법
+--ALTER TABLE 테이블이름 NOLOGGING; 으로 명령을 입력하고 실행하면됨
+
+--UPDATE 데이터수정
+--기본형식
+--UPDATE 테이블이름 SET 컬럼이름 = 수정할내용 WHERE 조건;
+--WHERE절이 생략되면 테이블의 모든 데이터가 수정
+--SET 에는 여러 컬럼을 수정하도록 식을 여러개 작성 가능
+UPDATE DEPT03 SET LOC='서울';
+UPDATE DEPT03 SET DNAME='목포항구',LOC='목포항구' WHERE DEPTNO = 10;
+UPDATE DEPT03 SET DNAME='마산아구',LOC='마산아구' WHERE DEPTNO = 20;
+
+SELECT * FROM MYMEMBER;
+UPDATE MYMEMBER SET MEMBER_LOGINDATE = SYSDATE ;
+
+UPDATE DEPT03 SET LOC = (SELECT LOC FROM DEPT03 WHERE DEPTNO=10) WHERE DEPTNO = 30;
+
+UPDATE DEPT03 
+SET (DNAME,LOC) = (SELECT DNAME,LOC FROM DEPT03 WHERE DEPTNO = 20) 
+WHERE DEPTNO = 40;
+
+--DELETE - 데이터 삭제
+--DELETE FROM 테이블이름 WHERE 조건
+
+--조건이 생략되면 테이블의 모든 데이터가 삭제
+--FROM은 생략해도되는데 생략하는 것을 권장하지는 않음
+
+--DEPT03 테이블에서 DEPTNO가 10인 데이터를 삭제
+DELETE FROM DEPT03 WHERE DEPTNO = 10;
+SELECT * FROM DEPT03;
+
+--DEPT03 테이블의 모든 데이터를 삭제
+DELETE FROM DEPT03;
+SELECT * FROM DEPT03;
+
+--WHERE절에 서브쿼리 사용 가능
+DELETE FROM 테이블이름 WHERE 컬럼이름 = (SUB QUERY);
+
+--DEPT01 테이블에서 EMP01 테이블의 JOB이 SALES인 데이터와 DEPTNO가 같은 데이터는 전부 삭제
+DELETE FROM DEPT03 WHERE DEPTNO IN(SELECT DEPTNO FROM EMP WHERE ='SALES');
+
+--DELETE 와 TRUNCATE의 차이
+--DELETE는 데이터를 실제로 삭제하지 않고 삭제되었다는 표시만 함
+--복구가 가능하고 작업을 수행해도 실제 저장공간의 크기는 늘어나지 않음
+
+--TRUNCATE TABLE은 실제 데이터를 삭제함
+--복구를 할 수 없고 실제 저장공간의 크기는 늘어남
+
+--TCL(TRANSACTION CONTROL LANGUAGE)
+--트랜잭션 제어어
+--1.TRANSACTION
+--한번에 수행되어야 하는 작업의 논리적 단위
+--물리적인 작업 단위는 SQL 문장 1개
+
+--TRANSACTION의 4가지 성질
+--ATOMICITY(원자성): ALL OR NOTHING, 트랜잭션은 전부 수행되거나 하나도 실행되지 않아야 한다.
+--CONSISTENCY(일관성):트랜잭션 수행 전과 수행 후의 결과가 일관성이 있어야한다.
+--ISOLATION(격리성,독립성):트랜잭션이 사용중인 데이터는 완료나 철회되기전에 다른 트랜잭션이 수정하면 안된다.
+--DURABILITY(영속성,지속성):한번 완료된 트랜잭션은 계속되어야 한다.
+
+--데이터베이스 작업의 특징
+--DML 문장을 실행 할 때는 원본 데이터베이스를 복사해서 작업
+--DML 작업을 할 때 마다 작업 내역을 임시 작업 영역에 기록(INDO SEGMENT 또는 ROLLBACK SEGMENT)
+
+--트랜잭션 관련 명령어
+--1)COMMIT : 작업이 완료되었으니 원본에 반영
+--2)ROLLBACK : 작업이 실패했으니 원본에 작업 내용을 반영하지 말라는 명령
+--3)SAVEPOINT : ROLLBACK 할 위치 설정
+
+--TRANSACTION MODE 
+--AUTO COMMIT : 명령 수행이 성공 할 때 마다 자동적으로 COMMIT되는 모드
+--MANUAL COMMIT : 명시적으로 COMMIT을 호출하거나 COMMIT이 자동으로 되는 명령을 성공했을때만 COMMIT 되는 모드
+--ORACLE과 데이터베이스 FRAMEWORK 들의 대부분은 MANUAL COMMIT
+
+--트랜잭션 생성
+--트랜잭션이 완료되고(COMMIT이나 ROLLBACK) 새로운 DML(INSERT, UPDATE,DELETE)작업을 수행 했을 때
+--트랜잭션이 종료되는 경우는 두가지인데 하나는 명시적으로 COMMIT이나 ROLLBACK을 하는 경우이고
+--다른 하나는 자동적으로 COMMIT이나 ROLLBACK 되는 경우
+
+--자동으로 COMMIT되는 상황은 DDL(CREATE,ALTER,DROP)이나 DCL(GRANT,REVOKE) 명령을 수행 한 경우와
+--접속 프로그램을 정상 종료한 경우
+
+--자동으로 ROLLBACK되는 상황은 접속 프로그램의 비정상 종료
+
+CREATE TABLE DEPT03 AS SELECT * FROM DEPT;
+
+
+--1개의 데이터 추가 - 트랜잭션 생성
+INSERT INTO DEPT03 VALUES(50,'영업','서울');
+
+--5개의 데이터가 있음
+SELECT * FROM DEPT03;
+
+--ROLLBACK 수행 - 트랜잭션 생성 지점으로 작업이 철회
+ROLLBACK;
+
+--INSERT 하기 전 4개의 데이터로 돌아옴
+SELECT * FROM DEPT03;
+
+--DEPTNO가 10인 데이터를 삭제 - 트랜잭션 생성
+DELETE FROM DEPT03
+WHERE DEPTNO = 10;
+
+SELECT * FROM DEPT03;
+
+COMMIT;
+
+--DEPTNO가 20인 데이터를 삭제 - 트랜잭션 생성
+DELETE FROM DEPT03
+WHERE DEPTNO = 20;
+
+SELECT * FROM DEPT03;
+
+--DEPT 테이블과 구조가 같은 DEPT04 테이블을 생성
+CREATE TABLE DEPT04 AS SELECT * FROM DEPT;
+
+ROLLBACK;
+
+--DEPT03 테이블에서 DEPTNO가 30인 데이터를 삭제 - 트랜잭션 생성
+DELETE FROM DEPT03 WHERE DEPTNO = 30;
+
+--SAVEPOINT SV30을 생성
+SAVEPOINT SV30;
+
+--DEPT03 테이블에서 DEPTNO가 40인 데이터를 삭제
+DELETE FROM DEPT03 WHERE DEPTNO = 40;
+
+--ROLLBACK을 하게되면 30과 40 삭제한 작업 모두 취소
+--ROLLBACK TO SV30 하게되면 40 삭제한 작업만 취소
+
+ROLLBACK TO SV30;
+
+--VIEW
+--가상의 테이블
+--자주 사용하는 SELECT 구문을 하나의 이름으로 묶어두고 테이블 처럼 사용하는 것
+--VIEW를 생성하기 위해서는 다른 VIEW나 테이블이 존재해야 합니다.
+
+--생성 형식
+--CREATE VIEW [FORCE | NOFORCE] VIEW 뷰이름 
+--AS SELECT 구문 [WITH CHECK OPTION] [WITH READ ONLY]
+
+--REPLACE VIEW [FORCE | NOFORCE] VIEW 뷰이름 
+--AS SELECT 구문 [WITH CHECK OPTION] [WITH READ ONLY]
+
+--뷰는 실제로 존재하는 테이블이 아니라서 ALTER 명령을 사용 할 수 없습니다.
+--수정을 하고자 할 때는 CREATE OR REPLACE 명령 사용
+
+--기본은 NO FORCE라서 SELECT 구문에 있는 VIEW나 TABLE이 없으면 뷰가 생성되지 않는데 
+--FORCE를 사용하면 VIEW나 TABLE이 없어도 일단 만들어집니다.
+
+--WITH CHECK OPTION은 VIEW에 보여지는 데이터에만 DML 작업을 VIEW를 통해서 수행
+--WITH READ ONLY는 읽기 전용
